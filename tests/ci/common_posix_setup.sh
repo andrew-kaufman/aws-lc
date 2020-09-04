@@ -13,15 +13,15 @@ function run_build {
 
   if [[ -x "$(command -v ninja)" ]]; then
     echo "Using Ninja build system (ninja)."
-    BUILD_COMMAND="ninja -j $(nproc)"
+    BUILD_COMMAND="ninja"
     cflags+=(-GNinja)
   elif [[ -x "$(command -v ninja-build)" ]]; then
     echo "Using Ninja build system (ninja-build)."
-    BUILD_COMMAND="ninja-build -j $(nproc)"
+    BUILD_COMMAND="ninja-build"
     cflags+=(-GNinja)
   else
     echo "Using Make."
-    BUILD_COMMAND="make -j $(nproc)"
+    BUILD_COMMAND="make"
   fi
 
   cmake "${cflags[@]}" ../
