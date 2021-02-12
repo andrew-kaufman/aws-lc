@@ -628,6 +628,7 @@ endif()
 
       self.PrintLibrary(cmake, 'crypto',
           files['crypto'] + ['${CRYPTO_ARCH_SOURCES}'])
+      self.PrintExe(cmake, 'crypto_test', files['crypto_test'], ['crypto'])
       self.PrintLibrary(cmake, 'ssl', files['ssl'])
       self.PrintExe(cmake, 'bssl', files['tool'], ['ssl', 'crypto'])
 
@@ -755,7 +756,7 @@ def FindHeaderFiles(directory, filter_func):
         continue
       if not filter_func(path, filename, False):
         continue
-      hfiles.append(os.path.join(path, filename))
+      hfiles.append(os.path.relpath(os.path.join(path, filename), DEST_DIR))
 
       for (i, dirname) in enumerate(dirnames):
         if not filter_func(path, dirname, True):
@@ -901,6 +902,7 @@ def main(platforms):
   tool_c_files = FindCFiles(os.path.join(SRC_DIR, 'tool'), NoTests)
   tool_h_files = FindHeaderFiles(os.path.join(SRC_DIR, 'tool'), AllFiles)
 
+
   # BCM shared library C files
   bcm_crypto_c_files = [
       os.path.join(SRC_DIR, 'crypto', 'fipsmodule', 'bcm.c')
@@ -936,9 +938,9 @@ def main(platforms):
 
   crypto_test_files += FindCFiles(os.path.join(SRC_DIR, 'crypto'), OnlyTests)
   crypto_test_files += [
-      os.path.join(SRC_DIR, 'crypto/test/abi_test.cc'),
-      os.path.join(SRC_DIR, 'crypto/test/file_test_gtest.cc'),
-      os.path.join(SRC_DIR, 'crypto/test/gtest_main.cc'),
+      os.path.relpath(os.path.join(SRC_DIR, 'crypto/test/abi_test.cc'), DEST_DIR),
+      os.path.relpath(os.path.join(SRC_DIR, 'crypto/test/file_test_gtest.cc'), DEST_DIR),
+      os.path.relpath(os.path.join(SRC_DIR, 'crypto/test/gtest_main.cc'), DEST_DIR),
   ]
   # urandom_test.cc is in a separate binary so that it can be test PRNG
   # initialisation.
@@ -950,13 +952,13 @@ def main(platforms):
 
   ssl_test_files = FindCFiles(os.path.join(SRC_DIR, 'ssl'), OnlyTests)
   ssl_test_files += [
-      os.path.join(SRC_DIR, 'crypto/test/abi_test.cc'),
-      os.path.join(SRC_DIR, 'crypto/test/gtest_main.cc'),
+      os.path.relpath(os.path.join(SRC_DIR, 'crypto/test/abi_test.cc'), DEST_DIR),
+      os.path.relpath(os.path.join(SRC_DIR, 'crypto/test/gtest_main.cc'), DEST_DIR),
   ]
   ssl_test_files.sort()
 
   urandom_test_files = [
-      os.path.join(SRC_DIR, "crypto/fipsmodule/rand/urandom_test.cc"),
+      os.path.relpath(os.path.join(SRC_DIR, "crypto/fipsmodule/rand/urandom_test.cc"), DEST_DIR),
   ]
 
   fuzz_c_files = FindCFiles(os.path.join(SRC_DIR, 'fuzz'), NoTests)
@@ -980,7 +982,7 @@ def main(platforms):
       'crypto_headers': crypto_h_files,
       'crypto_internal_headers': crypto_internal_h_files,
       'crypto_test': crypto_test_files,
-      'crypto_test_data': sorted(os.path.join(SRC_DIR, x) for x in cmake['CRYPTO_TEST_DATA']),
+      'crypto_test_data': sorted(os.path.relpath(os.path.join(SRC_DIR, x), DEST_DIR) for x in cmake['CRYPTO_TEST_DATA']),
       'fips_fragments': fips_fragments,
       'fuzz': fuzz_c_files,
       'ssl': ssl_source_files,
