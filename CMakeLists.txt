@@ -515,12 +515,7 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
 elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "amd64")
   set(ARCH "x86_64")
 elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "AMD64")
-  # cmake reports AMD64 on Windows, but we might be building for 32-bit.
-  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(ARCH "x86_64")
-  else()
-    set(ARCH "x86")
-  endif()
+  set(ARCH "x86")
 elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86")
   set(ARCH "x86")
 elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i386")
@@ -545,6 +540,14 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "ppc64le")
   set(ARCH "ppc64le")
 else()
   message(FATAL_ERROR "Unknown processor:" ${CMAKE_SYSTEM_PROCESSOR})
+endif()
+
+if(ARCH STREQUAL "x86")
+  # In some places such as Docker, the wrong architecture may be reported.
+  # Set architecture to be 64-bit if CMAKE_SIZE_OF_VOID_P is equal to 8
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(ARCH "x86_64")
+  endif()
 endif()
 
 if (ARCH STREQUAL "aarch64" AND CMAKE_BUILD_TYPE_LOWER MATCHES "rel")
